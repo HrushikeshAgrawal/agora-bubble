@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+      integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w=="
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="./agora_popup.css" />
+    <script src="https://cdn.agora.io/sdk/release/AgoraRTCSDK-3.4.0.js"></script>
+    <script src="./js/agora-rtm-sdk-1.4.1.js"></script>
+    <script src="./script.js"></script>
+    <title>Warpbay</title>
+  </head>
+  <body>
+    <div class="agora-div">
+      <div class="loader">
+        <div class="loaderGif"></div>
+        <h1>Loading</h1>
+      </div>
+      <div class="videos">
+        <h1 id="joinedAs" style="display: none">Joined as</h1>
+        <div class="videosLayout">
+          <div id="pinned" style="display: none"></div>
+          <div id="remote-container">
+            <div
+              id="me"
+              class="stremeElement stremeElement1"
+              style="display: none"
+            >
+              <div
+                class="tempImage"
+                style="background: rgb(0, 255, 255); display: flex"
+              >
+                <h1 class="nameInitials">You</h1>
+              </div>
+              <h1 id="meUserName" class="streamName">You</h1>
+              <i
+                class="fas fa-ellipsis-v streamOptions"
+                onclick="showOptions('me')"
+              ></i>
+              <ul class="optionsDropdown">
+                <li onclick="sendMakeAudienceMessage('me')">Make Audience</li>
+                <li onclick="sendRemoveMessage('me')">Remove</li>
+                <li onclick="togglePin('me')">Pin</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-bar">
+          <div class="bottom-group">
+            <h1 class="time" id="duration">00:00:00</h1>
+            <h1 class="userCount">
+              <i class="fas fa-users"></i><span id="userCount">1</span>
+            </h1>
+          </div>
+          <div class="bottom-group middle-group">
+            <div class="actionBtn" onClick="toggleVideo()" id="videoBtnDiv">
+              <i class="fas fa-video" id="videoBtn"></i>
+            </div>
+            <div class="actionBtn" onClick="toggleAudio()" id="audioBtnDiv">
+              <i class="fas fa-microphone" id="audioBtn"></i>
+            </div>
+            <div
+              class="actionBtn"
+              onClick="shareScreenToggle()"
+              id="screenBtnDiv"
+            >
+              <i class="fas fa-desktop" id="screenBtn"></i>
+            </div>
+            <div class="actionBtn" onClick="toggleChatPopup()">
+              <i class="fas fa-comments" id="chatPopupBtn"></i>
+            </div>
+          </div>
+          <div class="bottom-group"></div>
+        </div>
+      </div>
+      <div class="chatPopup">
+        <div class="chatHeading">
+          <h1>Chat</h1>
+        </div>
+        <div class="chatArea" id="chatArea"></div>
+        <div class="chatInput">
+          <form onsubmit="sendChannelMessage(event)">
+            <input
+              id="inputText"
+              placeholder="Type here..."
+              autocomplete="off"
+            />
+          </form>
+        </div>
+      </div>
+
+      <!-- No Error Region -->
+      <div class="hiddenArea">
+        <div class="userListGroup" id="peopleList">
+          <div id="peopleListGroup"></div>
+        </div>
+        <div id="chatArea"></div>
+        <div id="peopleList"></div>
+        <div id="handRaiseList"></div>
+        <div id="raiseHandListBtn"></div>
+      </div>
+    </div>
+  </body>
+</html>
