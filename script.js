@@ -1,4 +1,6 @@
 let options = {
+  mode: "production",
+  // Mode can be development or production
   appId: "c183e2e9fd8b4036bc8466b240a066ce",
   channel: null,
   userName: null,
@@ -11,6 +13,13 @@ let options = {
   isOriginalHost: false,
   pinnedUser: null,
   raisedHandCounter: 0,
+};
+
+window.onload = async function () {
+  if (options.mode === "development") {
+    initializeRTCClient();
+    joinCall();
+  }
 };
 
 // RTC
@@ -96,32 +105,54 @@ const getRTMToken = async (userName) => {
 };
 
 const joinCall = async (userName, role, profilePic, session) => {
-  options.role = role;
-  options.userName = userName;
-  options.profilePic = profilePic;
-
-  if (session) {
-    options.channel = session;
-  } else {
+  if (options.mode === "development") {
     var url = new URL(window.location.href);
+    options.role = url.searchParams.get("role");
+    options.userName = url.searchParams.get("user");
     options.channel = url.searchParams.get("session");
+    if (!options.userName) {
+      options.userName = prompt("Enter username", "");
+    }
+    if (!options.role) {
+      options.role = "audience";
+    }
+    if (!options.channel) {
+      options.channel = "demo_channel_name";
+    }
+    if (!options.profilePic) {
+      options.profilePic =
+        "https://miro.medium.com/max/1200/1*mk1-6aYaf_Bes1E3Imhc0A.jpeg";
+    }
   }
 
-  if (!options.channel) {
-    options.channel = "demo_channel_name";
-  }
-  if (!options.userName) {
-    options.userName = prompt("Enter username", "");
-  }
-  if (!options.role) {
-    options.role = "host";
-  }
+  if (options.mode === "production") {
+    options.role = role;
+    options.userName = userName;
+    options.profilePic = profilePic;
 
-  let agoraDiv = document.getElementsByClassName("agora-div")[0];
-  let bubbleDiv = agoraDiv.parentElement;
-  bubbleDiv.style.height = "calc(100vh - 65px)";
-  bubbleDiv.parentElement.style.height = "calc(100vh - 65px)";
-  bubbleDiv.parentElement.parentElement.style.height = "calc(100vh - 65px)";
+    if (session) {
+      options.channel = session;
+    } else {
+      var url = new URL(window.location.href);
+      options.channel = url.searchParams.get("session");
+    }
+
+    if (!options.channel) {
+      options.channel = "demo_channel_name";
+    }
+    if (!options.userName) {
+      options.userName = prompt("Enter username", "");
+    }
+    if (!options.role) {
+      options.role = "host";
+    }
+
+    let agoraDiv = document.getElementsByClassName("agora-div")[0];
+    let bubbleDiv = agoraDiv.parentElement;
+    bubbleDiv.style.height = "calc(100vh - 65px)";
+    bubbleDiv.parentElement.style.height = "calc(100vh - 65px)";
+    bubbleDiv.parentElement.parentElement.style.height = "calc(100vh - 65px)";
+  }
 
   rtc.client.setClientRole(options.role);
   options.userName = options.userName.replace(/ /g, "_");
