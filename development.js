@@ -12,6 +12,11 @@ let options = {
   pinnedUser: null,
   raisedHandCounter: 0,
 };
+window.onload = async function () {
+  initializeRTCClient();
+  joinCall();
+  // stopLoader();
+};
 
 // RTC
 let rtc = {
@@ -95,33 +100,24 @@ const getRTMToken = async (userName) => {
   rtmClientLogin();
 };
 
-const joinCall = async (userName, role, profilePic, session) => {
-  options.role = role;
-  options.userName = userName;
-  options.profilePic = profilePic;
-
-  if (session) {
-    options.channel = session;
-  } else {
-    var url = new URL(window.location.href);
-    options.channel = url.searchParams.get("session");
-  }
-
-  if (!options.channel) {
-    options.channel = "demo_channel_name";
-  }
+const joinCall = async () => {
+  var url = new URL(window.location.href);
+  options.role = url.searchParams.get("role");
+  options.userName = url.searchParams.get("user");
+  options.channel = url.searchParams.get("session");
   if (!options.userName) {
     options.userName = prompt("Enter username", "");
   }
   if (!options.role) {
-    options.role = "host";
+    options.role = "audience";
   }
-
-  let agoraDiv = document.getElementsByClassName("agora-div")[0];
-  let bubbleDiv = agoraDiv.parentElement;
-  bubbleDiv.style.height = "calc(100vh - 65px)";
-  bubbleDiv.parentElement.style.height = "calc(100vh - 65px)";
-  bubbleDiv.parentElement.parentElement.style.height = "calc(100vh - 65px)";
+  if (!options.channel) {
+    options.channel = "demo_channel_name";
+  }
+  if (!options.profilePic) {
+    options.profilePic =
+      "https://miro.medium.com/max/1200/1*mk1-6aYaf_Bes1E3Imhc0A.jpeg";
+  }
 
   rtc.client.setClientRole(options.role);
   options.userName = options.userName.replace(/ /g, "_");
@@ -291,13 +287,13 @@ const addSelfScreenStream = (elementId) => {
   streamName.classList.add("streamName");
 
   let optionsTemplate = `
-  <i class="fas fa-ellipsis-v streamOptions"onclick="showOptions('${elementId}')"></i>
-  <ul class="optionsDropdown">
-    <li onclick="sendMakeAudienceMessage('${elementId}')">Make Audience</li>
-    <li onclick="sendRemoveMessage('${elementId}')">Remove</li>
-    <li onclick="togglePin('${elementId}')">Pin</li>
-  </ul>
-  `;
+    <i class="fas fa-ellipsis-v streamOptions"onclick="showOptions('${elementId}')"></i>
+    <ul class="optionsDropdown">
+      <li onclick="sendMakeAudienceMessage('${elementId}')">Make Audience</li>
+      <li onclick="sendRemoveMessage('${elementId}')">Remove</li>
+      <li onclick="togglePin('${elementId}')">Pin</li>
+    </ul>
+    `;
 
   let youArePresentingH1 = document.createElement("h1");
   youArePresentingH1.innerText = "You Are Presenting";
@@ -328,13 +324,13 @@ const addVideoStream = async (elementId) => {
   let displayType = "none";
   if (options.role === "host") displayType = "flex";
   let optionsTemplate = `
-  <i class="fas fa-ellipsis-v streamOptions" onclick="showOptions('${elementId}')" style="display: ${displayType}"></i>
-  <ul class="optionsDropdown" style="display: none">
-    <li onclick="sendMakeAudienceMessage('${elementId}')">Make Audience</li>
-    <li onclick="sendRemoveMessage('${elementId}')">Remove</li>
-    <li onclick="togglePin('${elementId}')">Pin</li>
-  </ul>
-  `;
+    <i class="fas fa-ellipsis-v streamOptions" onclick="showOptions('${elementId}')" style="display: ${displayType}"></i>
+    <ul class="optionsDropdown" style="display: none">
+      <li onclick="sendMakeAudienceMessage('${elementId}')">Make Audience</li>
+      <li onclick="sendRemoveMessage('${elementId}')">Remove</li>
+      <li onclick="togglePin('${elementId}')">Pin</li>
+    </ul>
+    `;
 
   let streamDiv = document.createElement("div");
   streamDiv.id = elementId;
@@ -406,36 +402,36 @@ const removeVideoStream = (elementId) => {
 
 const updateClassName = () => {
   /*
-  stremeElement - all
-
-  stremeElement1 - 1 host
-  stremeElement2 - 2 hosts
-  stremeElement3plus - 3 plus hosts
-
-  stremeElementPinned - video is pinned
-  stremeElementSide - some other video is pinned
-
-  screenStremeElement - screen shared video
-
-  ALGO:
-  stremeElement
-
-  if some video is pinned:
-    if current video is ponned:
-      stremeElementPinned
+    stremeElement - all
+  
+    stremeElement1 - 1 host
+    stremeElement2 - 2 hosts
+    stremeElement3plus - 3 plus hosts
+  
+    stremeElementPinned - video is pinned
+    stremeElementSide - some other video is pinned
+  
+    screenStremeElement - screen shared video
+  
+    ALGO:
+    stremeElement
+  
+    if some video is pinned:
+      if current video is ponned:
+        stremeElementPinned
+      else:
+        stremeElementSide
     else:
-      stremeElementSide
-  else:
-    host count === 1:
-      stremeElement1
-    host count === 2:
-      stremeElement2
-    host count >= 3:
-      stremeElement3plus
-      
-  if current video is of a screen:
-    screenStremeElement
-  */
+      host count === 1:
+        stremeElement1
+      host count === 2:
+        stremeElement2
+      host count >= 3:
+        stremeElement3plus
+        
+    if current video is of a screen:
+      screenStremeElement
+    */
 
   const remoteContainer = document.getElementById("remote-container");
   const streams = remoteContainer.getElementsByClassName("stremeElement");
@@ -704,14 +700,14 @@ const addChat = async (msg, sender) => {
   let roleAndPic = getRoleAndPicFromName(sender);
   let picDiv = generateProfilePicOrInitials(sender, roleAndPic.profilePic);
   let template = `
-  <div class="chatElement">
-    <div class="peopleListDiv">
-      ${picDiv}
-      <span>${sender.replace(/_/g, " ")}</span>
+    <div class="chatElement">
+      <div class="peopleListDiv">
+        ${picDiv}
+        <span>${sender.replace(/_/g, " ")}</span>
+      </div>
+      <p>${msg}</p>
     </div>
-    <p>${msg}</p>
-  </div>
-  `;
+    `;
   const chatArea = document.getElementById("chatArea");
   chatArea.innerHTML += template;
   chatArea.scrollTop = chatArea.scrollHeight;
@@ -862,18 +858,18 @@ const generatePeopleList = (name, role, profilePic) => {
   // `;
 
   let template = `
-  <div class="userItem" id="${name}-peoplList" >
-    <div class="peopleListDiv">
-      ${picDiv}
-      <span>${name.replace(/_/g, " ")} (${role})</span>
+    <div class="userItem" id="${name}-peoplList" >
+      <div class="peopleListDiv">
+        ${picDiv}
+        <span>${name.replace(/_/g, " ")} (${role})</span>
+      </div>
+      <i class="fas fa-ellipsis-v peopleListOptions" onclick="showOptionsPeopleList('${name}')" style="display: ${displayValue}"></i>
+      <ul class="optionsDropdownPeopleList" style="display: none">
+        <li onclick="sendMakeHostMessage('${name}')">Make Host</li>
+        <li onclick="sendRemoveMessage('${name}')">Remove</li>
+      </ul>
     </div>
-    <i class="fas fa-ellipsis-v peopleListOptions" onclick="showOptionsPeopleList('${name}')" style="display: ${displayValue}"></i>
-    <ul class="optionsDropdownPeopleList" style="display: none">
-      <li onclick="sendMakeHostMessage('${name}')">Make Host</li>
-      <li onclick="sendRemoveMessage('${name}')">Remove</li>
-    </ul>
-  </div>
-  `;
+    `;
 
   return template;
 };
@@ -885,15 +881,15 @@ const generateRaiseHandList = (name, role, profilePic) => {
   let picDiv = generateProfilePicOrInitials(name, profilePic);
 
   let template = `
-  <div class="userItem" id="${name}-hand">
-    <div class="peopleListDiv">
-      ${picDiv}
-      <span>${name.replace(/_/g, " ")} (${role})</span>
+    <div class="userItem" id="${name}-hand">
+      <div class="peopleListDiv">
+        ${picDiv}
+        <span>${name.replace(/_/g, " ")} (${role})</span>
+      </div>
+      <button onclick="sendMakeHostMessage('${name}')" style="display: ${displayValue}" >Make Host</button>
+      <button onclick="sendRejectHostMessage('${name}')" style="display: ${displayValue}" >Reject</button>
     </div>
-    <button onclick="sendMakeHostMessage('${name}')" style="display: ${displayValue}" >Make Host</button>
-    <button onclick="sendRejectHostMessage('${name}')" style="display: ${displayValue}" >Reject</button>
-  </div>
-  `;
+    `;
   return template;
 };
 
@@ -901,15 +897,15 @@ const generateProfilePicOrInitials = (name, profilePic) => {
   let picDiv = "";
   if (profilePic) {
     picDiv = `
-    <div class="peopleListImage" style="background: url('${profilePic}')">
-    </div>
-    `;
+      <div class="peopleListImage" style="background: url('${profilePic}')">
+      </div>
+      `;
   } else {
     picDiv = `
-    <div class="peopleListImage" style="background: #00ffff" >
-      <h1>${name.charAt(0).toUpperCase()}</h1>
-    </div>
-    `;
+      <div class="peopleListImage" style="background: #00ffff" >
+        <h1>${name.charAt(0).toUpperCase()}</h1>
+      </div>
+      `;
   }
   return picDiv;
 };
@@ -1039,34 +1035,34 @@ const toggleMobileChat = () => {
 };
 
 /*
-Replace this 
-
-const joinCall = async (userName, role, profilePic,session) => {
-  options.role = role;
-  options.userName = userName;
-  options.profilePic = profilePic;
-
-  if(session){
-      options.channel = session;
-  } else {
-      var url = new URL(window.location.href);
-      options.channel = url.searchParams.get("session");
+  Replace this 
+  
+  const joinCall = async (userName, role, profilePic,session) => {
+    options.role = role;
+    options.userName = userName;
+    options.profilePic = profilePic;
+  
+    if(session){
+        options.channel = session;
+    } else {
+        var url = new URL(window.location.href);
+        options.channel = url.searchParams.get("session");
+    }
+  
+    if (!options.channel) {
+      options.channel = "demo_channel_name";
+    }
+    if (!options.userName) {
+      options.userName = prompt("Enter username", "");
+    }
+    if (!options.role) {
+      options.role = "host";
+    }
+  
+    let agoraDiv = document.getElementsByClassName("agora-div")[0];
+    let bubbleDiv = agoraDiv.parentElement;
+    bubbleDiv.style.height = "calc(100vh - 65px)";
+    bubbleDiv.parentElement.style.height = "calc(100vh - 65px)";
+    bubbleDiv.parentElement.parentElement.style.height = "calc(100vh - 65px)";
   }
-
-  if (!options.channel) {
-    options.channel = "demo_channel_name";
-  }
-  if (!options.userName) {
-    options.userName = prompt("Enter username", "");
-  }
-  if (!options.role) {
-    options.role = "host";
-  }
-
-  let agoraDiv = document.getElementsByClassName("agora-div")[0];
-  let bubbleDiv = agoraDiv.parentElement;
-  bubbleDiv.style.height = "calc(100vh - 65px)";
-  bubbleDiv.parentElement.style.height = "calc(100vh - 65px)";
-  bubbleDiv.parentElement.parentElement.style.height = "calc(100vh - 65px)";
-}
-*/
+  */
