@@ -495,3 +495,59 @@
 .hiddenArea {
   display: none !important;
 }
+
+@media (max-width: 560px) {
+  :root {
+    --agora-height: 150vw;
+    --agora-width: 98vw;
+  }
+  .bottom-bar {
+    padding-bottom: 5px;
+    justify-content: center !important;
+  }
+  .bottom-group:nth-child(1),
+  .bottom-group:nth-child(3) {
+    display: none;
+  }
+  #screenBtnDiv {
+    display: none;
+  }
+
+  .chatPopup {
+    left: 25%;
+  }
+
+  .videos #remote-container {
+    padding: 0 0 0 0;
+    align-items: center;
+    overflow: scroll;
+    width: 100%;
+  }
+
+  .stremeElement {
+    flex: none;
+    width: 92vw !important;
+    height: 69vw !important;
+    max-width: none;
+    max-height: none;
+    margin: 5px auto;
+  }
+
+  #pinned {
+    flex: none;
+  }
+  .videosLayout {
+    flex-direction: column;
+  }
+
+  ::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  .optionsDropdown li {
+    margin: 6px 0;
+  }
+  .optionsDropdownPeopleList li {
+    margin: 6px 0;
+  }
+}
