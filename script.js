@@ -1,5 +1,5 @@
 let options = {
-  mode: "production",
+  mode: "development",
   // Mode can be development or production
   appId: "c183e2e9fd8b4036bc8466b240a066ce",
   channel: null,
@@ -324,7 +324,7 @@ const addSelfScreenStream = (elementId) => {
   let optionsTemplate = `
   <i class="fas fa-ellipsis-v streamOptions"onclick="showOptions('${elementId}')"></i>
   <ul class="optionsDropdown">
-    <li onclick="sendMakeAudienceMessage('${elementId}')">Make Audience</li>
+    <li onclick="sendMakeAudienceMessage('${elementId}')" class="hideInPopup" >Make Audience</li>
     <li onclick="sendRemoveMessage('${elementId}')">Remove</li>
     <li onclick="togglePin('${elementId}')">Pin</li>
   </ul>
@@ -361,7 +361,7 @@ const addVideoStream = async (elementId) => {
   let optionsTemplate = `
   <i class="fas fa-ellipsis-v streamOptions" onclick="showOptions('${elementId}')" style="display: ${displayType}"></i>
   <ul class="optionsDropdown" style="display: none">
-    <li onclick="sendMakeAudienceMessage('${elementId}')">Make Audience</li>
+    <li onclick="sendMakeAudienceMessage('${elementId}')" class="hideInPopup" >Make Audience</li>
     <li onclick="sendRemoveMessage('${elementId}')">Remove</li>
     <li onclick="togglePin('${elementId}')">Pin</li>
   </ul>
