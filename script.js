@@ -1,5 +1,5 @@
 let options = {
-  mode: "development",
+  mode: "production",
   // Mode can be development or production
   appId: "c183e2e9fd8b4036bc8466b240a066ce",
   channel: null,
