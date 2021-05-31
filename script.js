@@ -704,7 +704,6 @@ const handleNewMessage = (chatJson, senderId) => {
 
 const addChat = async (msg, sender) => {
 
-  console.log("sakib", msg);
 
   let roleAndPic = getRoleAndPicFromName(sender);
   let picDiv = generateProfilePicOrInitials(sender, roleAndPic.profilePic);
