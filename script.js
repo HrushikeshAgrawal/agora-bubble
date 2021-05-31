@@ -666,6 +666,7 @@ const checkIfPinnedUserExist = async () => {
 };
 
 const handleNewMessage = (chatJson, senderId) => {
+  console.log("chatjson", chatJson);
   switch (chatJson.messageType) {
     case "text":
       addChat(chatJson.text, senderId);
@@ -703,6 +704,8 @@ const handleNewMessage = (chatJson, senderId) => {
 
 const addChat = async (msg, sender) => {
 
+  console.log("sakib", msg);
+
   let roleAndPic = getRoleAndPicFromName(sender);
   let picDiv = generateProfilePicOrInitials(sender, roleAndPic.profilePic);
   let template = ``;
@@ -714,10 +717,10 @@ const addChat = async (msg, sender) => {
           <span>${sender.replace(/_/g, " ")}</span>
         </div>
         <h4>${msg.ques}</h4>
-        <p class="pollOptions" >1. ${msg.option1}</p>  
-        <p class="pollOptions" >2. ${msg.option2}</p>
-        <p class="pollOptions" >3. ${msg.option3}</p>
-        <p class="pollOptions" >4. ${msg.option4}</p>
+        <p class="pollOptions" id="pollOption1" onclick="selectOption(event,'${sender}')" >1. ${msg.option1} <span id="result1" ></span> </p>   
+        <p class="pollOptions" id="pollOption2" onclick="selectOption(event,'${sender}')" >2. ${msg.option2} <span id="result2" ></span></p> 
+        <p class="pollOptions" id="pollOption3" onclick="selectOption(event,'${sender}')" >3. ${msg.option3} <span id="result3" ></span></p> 
+        <p class="pollOptions" id="pollOption4" onclick="selectOption(event,'${sender}')" >4. ${msg.option4} <span id="result4" ></span></p> 
       </div>
       `;
   }
@@ -739,28 +742,67 @@ const addChat = async (msg, sender) => {
   chatArea.scrollTop = chatArea.scrollHeight;
 };
 
+const option1List = [];
+const option2List = [];
+const option3List = [];
+const option4List = [];
+
+const selectOption = (event, sender) => {
+  const selectedOption = event.target.id;
+
+  if (selectedOption === "pollOption1" && !option1List.includes(sender)) {
+    option1List.push(sender)
+  }
+  if (selectedOption === "pollOption2" && !option2List.includes(sender)) {
+    option2List.push(sender)
+  }
+  if (selectedOption === "pollOption3" && !option3List.includes(sender)) {
+    option3List.push(sender)
+  }
+  if (selectedOption === "pollOption4" && !option4List.includes(sender)) {
+    option4List.push(sender)
+  }
+
+  const totalSelection = option1List.length + option2List.length + option3List.length + option4List.length;
+
+  const option1Per = Math.round((100 * option1List.length) / totalSelection) + "%";
+  const option2Per = Math.round((100 * option2List.length) / totalSelection) + "%";
+  const option3Per = Math.round((100 * option3List.length) / totalSelection) + "%";
+  const option4Per = Math.round((100 * option4List.length) / totalSelection) + "%";
+
+  document.getElementById("result1").innerText = option1Per;
+  document.getElementById("result2").innerText = option2Per;
+  document.getElementById("result3").innerText = option3Per;
+  document.getElementById("result4").innerText = option4Per;
+
+}
+
 const sendChannelMessage = async (event, isPoll) => {
   event.preventDefault();
   if (isPoll) {
+
     const ques = document.getElementById("quesInp").value;
     const option1 = document.getElementById("ansInp1").value;
     const option2 = document.getElementById("ansInp2").value;
     const option3 = document.getElementById("ansInp3").value;
     const option4 = document.getElementById("ansInp4").value;
+
     if (ques === "" || ques === null || ques === undefined) return;
     if (option1 === "" || option1 === null || option1 === undefined) return;
     if (option2 === "" || option2 === null || option2 === undefined) return;
     if (option3 === "" || option3 === null || option3 === undefined) return;
-    if (option4 === "" || option4 === null || option4 === undefined) return; document.getElementById("quesInp").value = "";
+    if (option4 === "" || option4 === null || option4 === undefined) return;
+
+    document.getElementById("quesInp").value = "";
     document.getElementById("ansInp1").value = "";
     document.getElementById("ansInp2").value = "";
     document.getElementById("ansInp3").value = "";
     document.getElementById("ansInp4").value = "";
-    const pollObj = { ques, option1, option2, option3, option4 };
-    console.log(pollObj);
-    addChat(pollObj, options.userName);
-    const chatJson = { messageType: "text", pollObj }
-    // await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });
+
+    const text = { ques, option1, option2, option3, option4 };
+    addChat(text, options.userName);
+    const chatJson = { messageType: "text", text }
+    await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });
   }
   else {
     const text = document.getElementById("inputText").value;
