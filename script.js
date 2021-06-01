@@ -168,6 +168,19 @@ const joinCall = async (userName, role, profilePic, session) => {
     options.userName,
     (uid) => {
       options.userName = uid;
+      if (options.role == "host")
+        navigator.getUserMedia(
+          {
+            video: true,
+            audio: true,
+          },
+          (mediaStream) => {},
+          (err) => {
+            alert(
+              "You have blocked audio or video for the website. Please unblock and reload."
+            );
+          }
+        );
       if (options.role == "audience") toggleHostOnlyOptions("none");
       initializeRTMClient();
       getRTMToken(uid);
