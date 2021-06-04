@@ -666,9 +666,19 @@ const checkIfPinnedUserExist = async () => {
 };
 
 const handleNewMessage = (chatJson, senderId) => {
+
   switch (chatJson.messageType) {
+    case "upVote":
+      upVote(chatJson.text, chatJson.id, senderId);
+      break;
+    case "reply":
+      addReply(chatJson.id, chatJson.text);
+      break;
+    case "qna":
+      addQnA(chatJson.text, chatJson.qnaSender);
+      break;
     case "pollSelected":
-      sendSelected(chatJson.options)
+      sendSelected(chatJson.options, senderId);
       break;
     case "text":
       addChat(chatJson.text, senderId);
@@ -704,10 +714,105 @@ const handleNewMessage = (chatJson, senderId) => {
   }
 };
 
+
+let id = 0;
+const addQnA = async (msg, sender) => {
+  const QnAList = []
+  id++;
+  let picDiv = ""
+  if (sender === "Anonymous") {
+    picDiv = "Anonymous"
+  }
+  else {
+    let roleAndPic = getRoleAndPicFromName(sender);
+    picDiv = generateProfilePicOrInitials(sender, roleAndPic.profilePic);
+  }
+
+
+  QnAObject = { id: id, msg: msg, isAnswered: true, upVoter: [] }
+  QnAList.push(QnAObject)
+
+
+
+  QnAList.map(each => {
+    let template = `
+    <div class="chatElement qnaElement">
+      <div><div class="peopleListDiv">
+      ${picDiv}
+      <span>${sender === "Anonymous" ? "" : sender.replace(/_/g, " ")}</span>
+    </div>
+    <p>${each.msg}</p></div>
+      <div>  </div>
+      <div > <i onclick="sendUpVoteMessage('${each.id}')" id="${'upVote' + each.id}" class="fas fa-chevron-up" style="user-select:none" > ${QnAObject.upVoter.length} </i> <i id="${'replied' + each.id}" style="display:none" class="fas fa-check-circle"></i> <i onclick="openReply('${each.id}')" title="Reply" class="fas fa-reply"></i></div>
+    </div>
+    <div>
+    <div class="chatElement qnaElement">
+    <div class="replyDiv" id="${'replyDiv' + each.id}" style="display:none" >
+      <div class="peopleListDiv"></div>
+      <small id="${'reply' + each.id}" ></small>
+    </div>
+    <div id="${each.id}" class="qnaReply" >
+  <textarea name="" id="${'replyMsg' + each.id}" cols="30" rows="3"></textarea>
+  <button onclick="sendReplyMessage('${each.id}')" > Reply </button>
+</div>
+    `;
+    const qnaArea = document.getElementById("qnaArea");
+    qnaArea.innerHTML += template;
+    qnaArea.scrollTop = qnaArea.scrollHeight;
+  })
+
+}
+// ${picDiv}
+//     <span>${sender.replace(/_/g, " ")}</span>
+const openReply = (id) => {
+  document.getElementById(`${id}`).style.display = "block"
+}
+
+const upVote = (element, id, senderId) => {
+  if (!QnAObject.upVoter.includes(senderId)) {
+    QnAObject.upVoter.push(senderId);
+  }
+  console.log(QnAObject.upVoter);
+  let newElement = QnAObject.upVoter.length;
+  // let newElement = Number(element) + 1;
+  document.getElementById(`${"upVote" + id}`).innerText = newElement;
+}
+
+const sendUpVoteMessage = async (id) => {
+  // let element = document.getElementById(`${"upVote" + id}`).innerText;
+  if (!QnAObject.upVoter.includes(options.userName)) {
+    QnAObject.upVoter.push(options.userName);
+  }
+  let element = QnAObject.upVoter.length;
+  document.getElementById(`${"upVote" + id}`).innerText = element;
+  const chatJson = { messageType: "upVote", text: element, id: id };
+  await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });
+}
+
+const sendReplyMessage = async (id) => {
+  const text = document.getElementById(`${'replyMsg' + id}`).value;
+  addReply(id, text);
+  const chatJson = { messageType: "reply", text: text, id: id };
+  await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });
+}
+
+const addReply = (id, replyMsg) => {
+  console.log("addreply", document.getElementById(`${id}`));
+  const replyBox = document.getElementById(`${id}`);
+  replyBox ? replyBox.style.display = "none" : "";
+  document.getElementById(`${'replyDiv' + id}`).style.display = "block";
+  document.getElementById(`${'replied' + id}`).style.display = "block";
+  const replyDiv = document.getElementById(`${'reply' + id}`);
+  replyDiv.innerHTML = replyMsg;
+}
+
 const addChat = async (msg, sender) => {
+
 
   let roleAndPic = getRoleAndPicFromName(sender);
   let picDiv = generateProfilePicOrInitials(sender, roleAndPic.profilePic);
+
+
   let template = ``;
   if (msg instanceof Object) {
     template = `
@@ -740,9 +845,10 @@ const addChat = async (msg, sender) => {
   const chatArea = document.getElementById("chatArea");
   chatArea.innerHTML += template;
   chatArea.scrollTop = chatArea.scrollHeight;
+
 };
 
-const randomNo = Math.round(Math.random() * 1000);
+
 const pollVoter = {
   option1: [],
   option2: [],
@@ -753,27 +859,41 @@ const selectOption = async (event) => {
   const selectedOption = event.target.id;
 
   if (selectedOption === "pollOption1") {
-    pollVoter.option1.push(randomNo)
+    pollVoter.option1.push(options.userName)
   }
   if (selectedOption === "pollOption2") {
-    pollVoter.option2.push(randomNo)
+    pollVoter.option2.push(options.userName)
   }
   if (selectedOption === "pollOption3") {
-    pollVoter.option3.push(randomNo)
+    pollVoter.option3.push(options.userName)
   }
   if (selectedOption === "pollOption4") {
-    pollVoter.option4.push(randomNo)
+    pollVoter.option4.push(options.userName)
   }
 
   sendSelected(pollVoter)
-  const chatJson = { messageType: "pollSelected", options: pollVoter }
+  const chatJson = { messageType: "pollSelected", options: selectedOption }
   await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });
 
 }
 
-const sendSelected = async (options) => {
+const sendSelected = async (options, senderId) => {
   console.log(options);
-  const { option1, option2, option3, option4 } = options
+
+  if (options === "pollOption1") {
+    pollVoter.option1.push(senderId)
+  }
+  if (options === "pollOption2") {
+    pollVoter.option2.push(senderId)
+  }
+  if (options === "pollOption3") {
+    pollVoter.option3.push(senderId)
+  }
+  if (options === "pollOption4") {
+    pollVoter.option4.push(senderId)
+  }
+
+  const { option1, option2, option3, option4 } = pollVoter
   const totalSelection = option1.length + option2.length + option3.length + option4.length;
 
   const option1Per = Math.round((100 * option1.length) / totalSelection) + "%";
@@ -787,7 +907,7 @@ const sendSelected = async (options) => {
   document.getElementById("result4").innerText = option4Per;
 }
 
-const sendChannelMessage = async (event, isPoll) => {
+const sendChannelMessage = async (event, isPoll, qna) => {
   event.preventDefault();
   if (isPoll) {
 
@@ -810,17 +930,29 @@ const sendChannelMessage = async (event, isPoll) => {
     document.getElementById("ansInp4").value = "";
 
     const text = { ques, option1, option2, option3, option4 };
-    addChat(text, options.userName);
+    addChat(text, options.userName, false);
     const chatJson = { messageType: "text", text }
     await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });
   }
   else {
-    const text = document.getElementById("inputText").value;
-    if (text === "" || text === null || text === undefined) return;
-    document.getElementById("inputText").value = "";
-    addChat(text, options.userName);
-    const chatJson = { messageType: "text", text };
-    await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });
+    if (qna) {
+      const text = document.getElementById("qnaInputText").value;
+      if (text === "" || text === null || text === undefined) return;
+      document.getElementById("qnaInputText").value = "";
+      const askAnonymous = document.getElementById("qnaCheck").checked;
+      const qnaSender = askAnonymous ? "Anonymous" : options.userName
+      addQnA(text, qnaSender);
+      const chatJson = { messageType: "qna", text, qnaSender };
+      await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });
+    }
+    else {
+      const text = document.getElementById("inputText").value;
+      if (text === "" || text === null || text === undefined) return;
+      document.getElementById("inputText").value = "";
+      addChat(text, options.userName, false);
+      const chatJson = { messageType: "text", text };
+      await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });
+    }
   }
 };
 
@@ -1053,10 +1185,15 @@ const changeLayout = (toKeep) => {
   document.getElementById("chatArea").style.display = "none";
   document.getElementById("peopleList").style.display = "none";
   document.getElementById("handRaiseList").style.display = "none";
+  document.getElementById("qnaArea").style.display = "none";
   document.getElementsByClassName("chatInput")[0].style.display = "none";
+  document.getElementsByClassName("qnaInput")[0].style.display = "none";
   document.getElementById(toKeep).style.display = "block";
   if (toKeep === "chatArea") {
     document.getElementsByClassName("chatInput")[0].style.display = "block";
+  }
+  if (toKeep === "qnaArea") {
+    document.getElementsByClassName("qnaInput")[0].style.display = "block";
   }
 };
 

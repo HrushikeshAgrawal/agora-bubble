@@ -83,7 +83,7 @@
       <!-- Modal content -->
       <div class="modal-content">
         <span class="close">&times;</span>
-        <form onsubmit="sendChannelMessage(event,true)" id="poll-area">
+        <form onsubmit="sendChannelMessage(event,true,null)" id="poll-area">
           <input type="text" placeholder="Question" id="quesInp" />
           <input type="text" placeholder="Option 1" id="ansInp1" />
           <input type="text" placeholder="Option 2" id="ansInp2" />
@@ -101,6 +101,7 @@
           Raised Hands
           <span id="raisedHandCounter">(0)</span>
         </button>
+        <button onclick="changeLayout('qnaArea')">Q&A</button>
       </div>
       <div class="chatArea" id="chatArea">
         <h1>Chat</h1>
@@ -113,13 +114,26 @@
       <div class="userListGroup" id="handRaiseList" style="display: none">
         <h1>Hands Raised:</h1>
       </div>
+      <div class="qnaArea" id="qnaArea" style="display: none;">
+        <h1>QnA</h1>
+      </div>
       <div class="chatInput">
-        <form onsubmit="sendChannelMessage(event,false)">
+        <form onsubmit="sendChannelMessage(event,false,null)">
           <input id="inputText" autocomplete="off" />
           <button type="submit">
             <i class="fas fa-paper-plane"></i>
           </button>
         </form>
+      </div>
+      <div class="qnaInput" style="display: none">
+        <form onsubmit="sendChannelMessage(event,false,'qna')">
+          <input id="qnaInputText" autocomplete="off" />
+          <button type="submit">
+            <i class="fas fa-question"></i>
+          </button>
+        </form>
+        <label for="qnaCheck">Ask anonymously</label>
+        <input type="checkbox" name="qnaCheck" id="qnaCheck">
       </div>
     </div>
   </div>

@@ -281,16 +281,25 @@
   font-weight: 700;
 }
 
+.qnaArea {
+  background: #fff;
+  flex: 1;
+  padding: 10px;
+  overflow-y: scroll;
+}
+
 .chatArea {
   background: #fff;
   flex: 1;
   padding: 10px;
   overflow-y: scroll;
 }
-.chatInput form {
+.chatInput form,
+.qnaInput form {
   display: flex;
 }
-.chatInput input {
+.chatInput input,
+.qnaInput input {
   flex: 1;
   padding: 12px;
   font-size: 16px;
@@ -303,7 +312,8 @@
   margin-left: 10px;
   margin-right: 4px;
 }
-.chatInput button {
+.chatInput button,
+.qnaInput button {
   cursor: pointer;
   padding: 5px 10px;
   font-size: 20px;
@@ -312,7 +322,23 @@
   margin-right: 15px;
   align-content: center;
 }
+.qnaAction {
+  display: none;
+}
+.qnaElement:hover .qnaAction {
+  display: block;
+}
 
+.qnaElement {
+  display: flex;
+  justify-content: space-between;
+}
+.qnaReply {
+  display: none;
+}
+.replyDiv {
+  margin-left: 50px;
+}
 .userListGroup {
   background: #fff;
   flex: 1;
@@ -320,7 +346,8 @@
   overflow-y: scroll;
 }
 .userListGroup h1,
-.chatArea h1 {
+.chatArea h1,
+.qnaArea h1 {
   font-size: 18px;
 }
 .userListGroup p {
