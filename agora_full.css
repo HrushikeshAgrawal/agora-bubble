@@ -336,6 +336,31 @@
 .qnaReply {
   display: none;
 }
+
+.qnaSender {
+  color: #99989c;
+  font-weight: 600;
+}
+
+.qnaSingleDiv {
+  background-color: #5aff9d;
+  padding: 5px 10px 15px 10px;
+  margin: 0 0 15px 0;
+  border-radius: 10px;
+}
+
+.qnaIcon i {
+  margin-right: 15px;
+  color: #07be38;
+  cursor: pointer;
+}
+
+.qnaQues {
+  color: #3b3b3b;
+  font-weight: 600;
+  margin-left: 45px;
+}
+
 .replyDiv {
   margin-left: 50px;
 }

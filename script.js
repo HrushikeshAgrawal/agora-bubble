@@ -714,14 +714,14 @@ const handleNewMessage = (chatJson, senderId) => {
   }
 };
 
-
+const masterQnAList = [];
 let id = 0;
 const addQnA = async (msg, sender) => {
   const QnAList = []
   id++;
   let picDiv = ""
   if (sender === "Anonymous") {
-    picDiv = "Anonymous"
+    picDiv = generateProfilePicOrInitials(sender);
   }
   else {
     let roleAndPic = getRoleAndPicFromName(sender);
@@ -731,29 +731,40 @@ const addQnA = async (msg, sender) => {
 
   QnAObject = { id: id, msg: msg, isAnswered: true, upVoter: [] }
   QnAList.push(QnAObject)
-
+  masterQnAList.push(QnAObject)
 
 
   QnAList.map(each => {
     let template = `
+    <div id="${'singleQues' + each.id}" >
+  <div class="chatElement qnaElement">
+      <div>
+        <div class="peopleListDiv">
+          ${picDiv}
+          <span class="qnaSender" >${sender.replace(/_/g, " ")}</span>
+        </div>
+        <div class="qnaQues" >
+          <p>${each.msg}</p>
+        </div>
+        <div class="replyDiv" id="${'replyDiv' + each.id}" style="display:none" >
+        <small id="${'reply' + each.id}" ></small>
+      </div>
+      <div id="${each.id}" class="qnaReply" >
+        <textarea name="" id="${'replyMsg' + each.id}" cols="30" rows="3"></textarea>
+        <button onclick="sendReplyMessage('${each.id}')" > Reply </button>
+      </div>
+      </div>
+      
+  </div>
     <div class="chatElement qnaElement">
-      <div><div class="peopleListDiv">
-      ${picDiv}
-      <span>${sender === "Anonymous" ? "" : sender.replace(/_/g, " ")}</span>
+      
     </div>
-    <p>${each.msg}</p></div>
-      <div>  </div>
-      <div > <i onclick="sendUpVoteMessage('${each.id}')" id="${'upVote' + each.id}" class="fas fa-chevron-up" style="user-select:none" > ${QnAObject.upVoter.length} </i> <i id="${'replied' + each.id}" style="display:none" class="fas fa-check-circle"></i> <i onclick="openReply('${each.id}')" title="Reply" class="fas fa-reply"></i></div>
-    </div>
-    <div>
-    <div class="chatElement qnaElement">
-    <div class="replyDiv" id="${'replyDiv' + each.id}" style="display:none" >
-      <div class="peopleListDiv"></div>
-      <small id="${'reply' + each.id}" ></small>
-    </div>
-    <div id="${each.id}" class="qnaReply" >
-  <textarea name="" id="${'replyMsg' + each.id}" cols="30" rows="3"></textarea>
-  <button onclick="sendReplyMessage('${each.id}')" > Reply </button>
+    <div class="qnaIcon" >
+        <i onclick="sendUpVoteMessage('${each.id}')" class="fas fa-thumbs-up" style="user-select:none" >  <span id="${'upVote' + each.id}" style="color:black" >${QnAObject.upVoter.length}</span> </i>
+        <i id="${'replied' + each.id}" style="display:none" class="fas fa-check-circle"></i>
+        <i onclick="sendReplyMessage('${each.id}')" style="display: ${options.role === 'host' ? 'inline' : 'none'} " class="fas fa-arrow-up"></i>
+        <i onclick="openReply('${each.id}')" style="display: ${options.role === 'host' ? 'inline' : 'none'}"  title="Reply" class="fas fa-reply"></i>
+      </div>
 </div>
     `;
     const qnaArea = document.getElementById("qnaArea");
@@ -762,8 +773,7 @@ const addQnA = async (msg, sender) => {
   })
 
 }
-// ${picDiv}
-//     <span>${sender.replace(/_/g, " ")}</span>
+
 const openReply = (id) => {
   document.getElementById(`${id}`).style.display = "block"
 }
@@ -772,7 +782,6 @@ const upVote = (element, id, senderId) => {
   if (!QnAObject.upVoter.includes(senderId)) {
     QnAObject.upVoter.push(senderId);
   }
-  console.log(QnAObject.upVoter);
   let newElement = QnAObject.upVoter.length;
   // let newElement = Number(element) + 1;
   document.getElementById(`${"upVote" + id}`).innerText = newElement;
@@ -801,7 +810,8 @@ const addReply = (id, replyMsg) => {
   const replyBox = document.getElementById(`${id}`);
   replyBox ? replyBox.style.display = "none" : "";
   document.getElementById(`${'replyDiv' + id}`).style.display = "block";
-  document.getElementById(`${'replied' + id}`).style.display = "block";
+  document.getElementById(`${'replied' + id}`).style.display = "inline";
+  document.getElementById(`${'singleQues' + id}`).className = "qnaSingleDiv"
   const replyDiv = document.getElementById(`${'reply' + id}`);
   replyDiv.innerHTML = replyMsg;
 }
@@ -1121,7 +1131,14 @@ const generateRaiseHandList = (name, role, profilePic) => {
 
 const generateProfilePicOrInitials = (name, profilePic) => {
   let picDiv = "";
-  if (profilePic) {
+  if (name === "Anonymous") {
+    picDiv = `
+    <div class="peopleListImage">
+    <img src="https://www.pngfind.com/pngs/m/610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png" alt="" />
+    </div>
+    `;
+  }
+  else if (profilePic) {
     picDiv = `
     <div class="peopleListImage" style="background: url('${profilePic}')">
     </div>
