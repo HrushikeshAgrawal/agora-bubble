@@ -679,6 +679,8 @@
   }
 }
 
+/* Poll Design Start*/
+
 .modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
@@ -694,12 +696,65 @@
 }
 
 /* Modal Content */
-.modal-content {
+.modal-content-parent {
   background-color: #fefefe;
   margin: auto;
   padding: 20px;
   border: 1px solid #888;
   width: 30%;
+  border-radius: 10px;
+}
+.modal-content-parent > button {
+  background-color: #492b92;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: white;
+  cursor: pointer;
+  padding: 10px;
+  border: 0;
+  border-radius: 5px;
+}
+.modal-content-parent button:hover {
+  background-color: #2d1961;
+  color: white;
+}
+
+.eachPoll {
+  margin-top: 15px;
+  border: 2px solid #2d1961;
+  border-radius: 15px;
+  padding: 8px;
+  box-shadow: 1px 1px 5px #492b92;
+}
+
+.eachPoll button {
+  letter-spacing: 1.5px;
+  color: black;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 8px;
+  border: 2px solid #492b92;
+}
+.pollQuesDiv {
+  margin-top: 10px;
+  color: rgb(56, 54, 54);
+}
+
+.pollVotersDiv {
+  margin-top: 10px;
+  color: dimgray;
+}
+
+.pollFooterDiv {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.pollFooterDiv i {
+  margin-left: 15px;
+  font-size: 25px;
+  cursor: pointer;
 }
 
 #poll-area {
@@ -710,11 +765,30 @@
 #poll-area input {
   margin-top: 5px;
   padding: 5px;
+  background-color: transparent;
+  border: 0;
+  border: 1px solid grey;
+  border-radius: 5px;
+  color: whitesmoke;
+}
+
+#poll-area input:focus {
+  outline-color: #492b92;
+  outline-width: 1px;
+}
+#quesInp {
+  border: 0;
+  outline: 0;
+}
+.poll-create-area {
+  background-color: #303341;
 }
 
 #poll-area button {
   margin-top: 15px;
   padding: 5px;
+  background-color: transparent;
+  color: white;
 }
 
 .pollOptions {
@@ -722,6 +796,7 @@
   padding: 8px;
   margin: 2px;
   border-radius: 8px;
+  background-color: transparent;
 }
 
 /* The Close Button */
@@ -738,3 +813,5 @@
   text-decoration: none;
   cursor: pointer;
 }
+
+/* Poll Design End */

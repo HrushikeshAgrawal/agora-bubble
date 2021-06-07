@@ -163,12 +163,41 @@ const leaveCall = async (leaveType, pageRefresh = false) => {
 
 const createPoll = () => {
   let modal = document.getElementById("myModal");
-
+  let modalContent = document.getElementById("modalContent");
   modal.style.display = "block";
 
-  let span = document.getElementsByClassName("close")[0];
 
-  span.onclick = () => modal.style.display = "none";
+
+  const pollList = [{ id: 1, ques: "Which city have you joined from?", voters: 25 }, { id: 2, ques: "What device you prefer most?", voters: 22 }];
+
+  pollList.map(each => {
+    let template = `
+    <div class="eachPoll" >
+    <div class="pollNoDiv" ><h6>Poll ${each.id}</h6></div>
+    <div class="pollQuesDiv" ><p>${each.ques}</p></div>
+    <div class="pollVotersDiv" ><p>Votes ${each.voters}</p></div>
+    <div class="pollFooterDiv" >
+      <div> <button>Publish results</button> </div>
+      <div> 
+        <i class="fas fa-lock"></i>
+        <i class="fas fa-play-circle"></i>
+        <i class="fas fa-stop"></i>
+      </div>
+    </div>
+    </div>
+    `
+    modalContent.innerHTML += template;
+  })
+
+}
+
+const closeModal = (id) => {
+  if (id === 'myModal') document.getElementById("modalContent").innerHTML = "";
+  document.getElementById(id).style.display = "none"
+}
+
+const openPollModal = () => {
+  document.getElementById("poll-modal").style.display = "block";
 }
 
 const toggleAudio = () => {
