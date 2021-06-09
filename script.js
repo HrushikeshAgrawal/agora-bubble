@@ -161,35 +161,6 @@ const leaveCall = async (leaveType, pageRefresh = false) => {
   }
 };
 
-const createPoll = () => {
-  let modal = document.getElementById("myModal");
-  let modalContent = document.getElementById("modalContent");
-  modal.style.display = "block";
-
-
-
-  const pollList = [{ id: 1, ques: "Which city have you joined from?", voters: 25 }, { id: 2, ques: "What device you prefer most?", voters: 22 }];
-
-  pollList.map(each => {
-    let template = `
-    <div class="eachPoll" >
-    <div class="pollNoDiv" ><h6>Poll ${each.id}</h6></div>
-    <div class="pollQuesDiv" ><p>${each.ques}</p></div>
-    <div class="pollVotersDiv" ><p>Votes ${each.voters}</p></div>
-    <div class="pollFooterDiv" >
-      <div> <button>Publish results</button> </div>
-      <div> 
-        <i class="fas fa-lock"></i>
-        <i class="fas fa-play-circle"></i>
-        <i class="fas fa-stop"></i>
-      </div>
-    </div>
-    </div>
-    `
-    modalContent.innerHTML += template;
-  })
-
-}
 
 const closeModal = (id) => {
   if (id === 'myModal') document.getElementById("modalContent").innerHTML = "";
@@ -697,6 +668,9 @@ const checkIfPinnedUserExist = async () => {
 const handleNewMessage = (chatJson, senderId) => {
 
   switch (chatJson.messageType) {
+    case "addToPoll":
+      addToPoll(chatJson.text);
+      break;
     case "upVote":
       upVote(chatJson.text, chatJson.id, senderId);
       break;
@@ -742,6 +716,72 @@ const handleNewMessage = (chatJson, senderId) => {
       break;
   }
 };
+
+pollList = [];
+const createPoll = () => {
+  let modal = document.getElementById("myModal");
+  let modalContent = document.getElementById("modalContent");
+  modal.style.display = "block";
+  modalContent.innerHTML = "";
+
+  pollList.map(each => {
+    let template = `
+    <div class="eachPoll" >
+    <div class="pollNoDiv" ><h6>Poll ${each.id}</h6></div>
+    <div class="pollQuesDiv" ><p>${each.ques}</p></div>
+    <div class="pollVotersDiv" ><p>Votes ${each.voters}</p></div>
+    <div class="pollFooterDiv" >
+      <div> <button>Publish results</button> </div>
+      <div> 
+        <i class="fas fa-lock"></i>
+        <i onclick="sendChannelMessage(event,true,null)" id="${each.id}" class="fas fa-play-circle"></i>
+        <i class="fas fa-stop"></i>
+      </div>
+    </div>
+    </div>
+    `
+    modalContent.innerHTML += template;
+  })
+
+}
+let pollId = 0
+const saveNewPoll = async (event) => {
+  event.preventDefault();
+  pollId++;
+
+  const newPoll = {
+    id: pollId,
+    ques: document.getElementById('quesInp').value,
+    option1: document.getElementById('ansInp1').value,
+    option2: document.getElementById('ansInp2').value,
+    option3: document.getElementById('ansInp3').value,
+    option4: document.getElementById('ansInp4').value,
+    option5: document.getElementById('ansInp5').value,
+    voters: [],
+    option1Voters: [],
+    option2Voters: [],
+    option3Voters: [],
+    option4Voters: [],
+    option5Voters: []
+  }
+
+  addToPoll(newPoll)
+  const chatJson = { messageType: "addToPoll", text: newPoll }
+  await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });
+
+  createPoll(pollList);
+
+  document.getElementById('quesInp').value = ""
+  document.getElementById('ansInp1').value = ""
+  document.getElementById('ansInp2').value = ""
+  document.getElementById('ansInp3').value = ""
+  document.getElementById('ansInp4').value = ""
+  document.getElementById('ansInp5').value = ""
+}
+
+const addToPoll = (newPoll) => {
+  pollList.push(newPoll)
+}
 
 const masterQnAList = [];
 let id = 0;
@@ -835,7 +875,6 @@ const sendReplyMessage = async (id) => {
 }
 
 const addReply = (id, replyMsg) => {
-  console.log("addreply", document.getElementById(`${id}`));
   const replyBox = document.getElementById(`${id}`);
   replyBox ? replyBox.style.display = "none" : "";
   document.getElementById(`${'replyDiv' + id}`).style.display = "block";
@@ -847,24 +886,33 @@ const addReply = (id, replyMsg) => {
 
 const addChat = async (msg, sender) => {
 
-
   let roleAndPic = getRoleAndPicFromName(sender);
   let picDiv = generateProfilePicOrInitials(sender, roleAndPic.profilePic);
 
 
   let template = ``;
   if (msg instanceof Object) {
+
+    const options = [];
+    if (msg.option1) options.push(msg.option1)
+    if (msg.option2) options.push(msg.option2)
+    if (msg.option3) options.push(msg.option3)
+    if (msg.option4) options.push(msg.option4)
+    if (msg.option5) options.push(msg.option5)
+    let optionsTemplate = "";
+    options.map((each, index) => {
+      index++;
+      let singleOption = `<p class="pollOptions" id="${msg.id + 'option' + index}" onclick="selectOption(event)" >${index}. ${each} <span id="${msg.id + 'result' + index}" ></span> </p> `;
+      optionsTemplate += singleOption;
+    })
     template = `
       <div class="chatElement">
         <div class="peopleListDiv">
           ${picDiv}
           <span>${sender.replace(/_/g, " ")}</span>
         </div>
-        <h4>${msg.ques}</h4>
-        <p class="pollOptions" id="pollOption1" onclick="selectOption(event)" >1. ${msg.option1} <span id="result1" ></span> </p>   
-        <p class="pollOptions" id="pollOption2" onclick="selectOption(event)" >2. ${msg.option2} <span id="result2" ></span></p> 
-        <p class="pollOptions" id="pollOption3" onclick="selectOption(event)" >3. ${msg.option3} <span id="result3" ></span></p> 
-        <p class="pollOptions" id="pollOption4" onclick="selectOption(event)" >4. ${msg.option4} <span id="result4" ></span></p> 
+        <h4>${msg.ques}</h4>  
+        ${optionsTemplate}
       </div>
       `;
   }
@@ -887,88 +935,53 @@ const addChat = async (msg, sender) => {
 
 };
 
-
-const pollVoter = {
-  option1: [],
-  option2: [],
-  option3: [],
-  option4: []
-}
 const selectOption = async (event) => {
   const selectedOption = event.target.id;
 
-  if (selectedOption === "pollOption1") {
-    pollVoter.option1.push(options.userName)
-  }
-  if (selectedOption === "pollOption2") {
-    pollVoter.option2.push(options.userName)
-  }
-  if (selectedOption === "pollOption3") {
-    pollVoter.option3.push(options.userName)
-  }
-  if (selectedOption === "pollOption4") {
-    pollVoter.option4.push(options.userName)
-  }
+  // const pollId = selectedOption.slice(0, 1);
+  // const optionId = selectedOption.slice(1);
+  // const selectedPoll = pollList[pollId - 1];
 
-  sendSelected(pollVoter)
+  // selectedPoll[`${optionId + 'Voters'}`].push(options.userName);
+
+  sendSelected(selectedOption, options.userName)
   const chatJson = { messageType: "pollSelected", options: selectedOption }
   await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });
 
 }
 
-const sendSelected = async (options, senderId) => {
-  console.log(options);
+const sendSelected = async (selectedOption, senderId) => {
 
-  if (options === "pollOption1") {
-    pollVoter.option1.push(senderId)
-  }
-  if (options === "pollOption2") {
-    pollVoter.option2.push(senderId)
-  }
-  if (options === "pollOption3") {
-    pollVoter.option3.push(senderId)
-  }
-  if (options === "pollOption4") {
-    pollVoter.option4.push(senderId)
+  const pollId = selectedOption.slice(0, 1);
+  const optionId = selectedOption.slice(1);
+  const selectedPoll = pollList[pollId - 1];
+  if (!selectedPoll[`${optionId + 'Voters'}`].includes(senderId)) {
+    selectedPoll[`${optionId + 'Voters'}`].push(senderId);
   }
 
-  const { option1, option2, option3, option4 } = pollVoter
-  const totalSelection = option1.length + option2.length + option3.length + option4.length;
+  console.log(selectedPoll);
 
-  const option1Per = Math.round((100 * option1.length) / totalSelection) + "%";
-  const option2Per = Math.round((100 * option2.length) / totalSelection) + "%";
-  const option3Per = Math.round((100 * option3.length) / totalSelection) + "%";
-  const option4Per = Math.round((100 * option4.length) / totalSelection) + "%";
+  const { option1Voters, option2Voters, option3Voters, option4Voters, option5Voters } = selectedPoll
+  const totalSelection = option1Voters.length + option2Voters.length + option3Voters.length + option4Voters.length + option5Voters.length;
 
-  document.getElementById("result1").innerText = option1Per;
-  document.getElementById("result2").innerText = option2Per;
-  document.getElementById("result3").innerText = option3Per;
-  document.getElementById("result4").innerText = option4Per;
+  let option1Per = Math.round((100 * option1Voters.length) / totalSelection) + "%";
+  let option2Per = Math.round((100 * option2Voters.length) / totalSelection) + "%";
+  let option3Per = Math.round((100 * option3Voters.length) / totalSelection) + "%";
+  let option4Per = Math.round((100 * option4Voters.length) / totalSelection) + "%";
+  let option5Per = Math.round((100 * option5Voters.length) / totalSelection) + "%";
+  document.getElementById(`${pollId + "result1"}`).innerText = option1Per;
+  document.getElementById(`${pollId + "result2"}`).innerText = option2Per;
+  document.getElementById(`${pollId + "result3"}`).innerText = option3Per;
+  document.getElementById(`${pollId + "result4"}`).innerText = option4Per;
+  document.getElementById(`${pollId + "result5"}`).innerText = option5Per;
 }
 
 const sendChannelMessage = async (event, isPoll, qna) => {
   event.preventDefault();
   if (isPoll) {
 
-    const ques = document.getElementById("quesInp").value;
-    const option1 = document.getElementById("ansInp1").value;
-    const option2 = document.getElementById("ansInp2").value;
-    const option3 = document.getElementById("ansInp3").value;
-    const option4 = document.getElementById("ansInp4").value;
-
-    if (ques === "" || ques === null || ques === undefined) return;
-    if (option1 === "" || option1 === null || option1 === undefined) return;
-    if (option2 === "" || option2 === null || option2 === undefined) return;
-    if (option3 === "" || option3 === null || option3 === undefined) return;
-    if (option4 === "" || option4 === null || option4 === undefined) return;
-
-    document.getElementById("quesInp").value = "";
-    document.getElementById("ansInp1").value = "";
-    document.getElementById("ansInp2").value = "";
-    document.getElementById("ansInp3").value = "";
-    document.getElementById("ansInp4").value = "";
-
-    const text = { ques, option1, option2, option3, option4 };
+    const poll = pollList.find(each => each.id == event.target.id)
+    const text = poll;
     addChat(text, options.userName, false);
     const chatJson = { messageType: "text", text }
     await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });

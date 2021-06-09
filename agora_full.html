@@ -93,14 +93,18 @@
       <div class="modal-content-parent poll-create-area">
         <span onclick="closeModal('poll-modal')" class="close">&times;</span>
         <div class="modal-content">
-          <form onsubmit="sendChannelMessage(event,true,null)" id="poll-area">
-            <input type="text" placeholder="Question" id="quesInp" />
-            <input type="text" placeholder="Option 1" id="ansInp1" />
-            <input type="text" placeholder="Option 2" id="ansInp2" />
+          <form onsubmit="saveNewPoll(event)" id="poll-area">
+            <input type="text" placeholder="*Question" oninvalid="this.setCustomValidity('Enter poll question here')"
+              required id="quesInp" />
+            <input type="text" placeholder="*Option 1" oninvalid="this.setCustomValidity('Enter first option here')"
+              required id="ansInp1" />
+            <input type="text" placeholder="*Option 2" oninvalid="this.setCustomValidity('Enter second option here')"
+              required id="ansInp2" />
             <input type="text" placeholder="Option 3" id="ansInp3" />
             <input type="text" placeholder="Option 4" id="ansInp4" />
-            <button>Launch</button>
-            <button>Save</button>
+            <input type="text" placeholder="Option 4" id="ansInp5" />
+            <button onclick="sendChannelMessage(event,true,null)">Launch</button>
+            <button type="submit">Save</button>
           </form>
         </div>
       </div>
