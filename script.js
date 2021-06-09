@@ -717,6 +717,7 @@ const handleNewMessage = (chatJson, senderId) => {
   }
 };
 
+
 pollList = [];
 const createPoll = () => {
   let modal = document.getElementById("myModal");
@@ -777,6 +778,7 @@ const saveNewPoll = async (event) => {
   document.getElementById('ansInp3').value = ""
   document.getElementById('ansInp4').value = ""
   document.getElementById('ansInp5').value = ""
+  document.getElementById("poll-modal").style.display = "none";
 }
 
 const addToPoll = (newPoll) => {
@@ -852,12 +854,10 @@ const upVote = (element, id, senderId) => {
     QnAObject.upVoter.push(senderId);
   }
   let newElement = QnAObject.upVoter.length;
-  // let newElement = Number(element) + 1;
   document.getElementById(`${"upVote" + id}`).innerText = newElement;
 }
 
 const sendUpVoteMessage = async (id) => {
-  // let element = document.getElementById(`${"upVote" + id}`).innerText;
   if (!QnAObject.upVoter.includes(options.userName)) {
     QnAObject.upVoter.push(options.userName);
   }
@@ -938,12 +938,6 @@ const addChat = async (msg, sender) => {
 const selectOption = async (event) => {
   const selectedOption = event.target.id;
 
-  // const pollId = selectedOption.slice(0, 1);
-  // const optionId = selectedOption.slice(1);
-  // const selectedPoll = pollList[pollId - 1];
-
-  // selectedPoll[`${optionId + 'Voters'}`].push(options.userName);
-
   sendSelected(selectedOption, options.userName)
   const chatJson = { messageType: "pollSelected", options: selectedOption }
   await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });
@@ -977,6 +971,7 @@ const sendSelected = async (selectedOption, senderId) => {
 }
 
 const sendChannelMessage = async (event, isPoll, qna) => {
+  document.getElementById("myModal").style.display = "none";
   event.preventDefault();
   if (isPoll) {
 
