@@ -735,7 +735,7 @@ const createPoll = () => {
       <div> <button>Publish results</button> </div>
       <div> 
         <i class="fas fa-lock"></i>
-        <i onclick="sendChannelMessage(event,true,null)" id="${each.id}" class="fas fa-play-circle"></i>
+        <i title="Launch" onclick="sendChannelMessage(event,true,null)" id="${each.id}" class="fas fa-play-circle"></i>
         <i class="fas fa-stop"></i>
       </div>
     </div>
