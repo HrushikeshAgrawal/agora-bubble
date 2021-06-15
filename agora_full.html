@@ -94,12 +94,9 @@
         <span onclick="closeModal('poll-modal')" class="close">&times;</span>
         <div class="modal-content">
           <form onsubmit="saveNewPoll(event)" id="poll-area">
-            <input type="text" placeholder="*Question" oninvalid="this.setCustomValidity('Enter poll question here')"
-              required id="quesInp" />
-            <input type="text" placeholder="*Option 1" oninvalid="this.setCustomValidity('Enter first option here')"
-              required id="ansInp1" />
-            <input type="text" placeholder="*Option 2" oninvalid="this.setCustomValidity('Enter second option here')"
-              required id="ansInp2" />
+            <input type="text" placeholder="*Question" required id="quesInp" />
+            <input type="text" placeholder="*Option 1" required id="ansInp1" />
+            <input type="text" placeholder="*Option 2" required id="ansInp2" />
             <input type="text" placeholder="Option 3" id="ansInp3" />
             <input type="text" placeholder="Option 4" id="ansInp4" />
             <input type="text" placeholder="Option 4" id="ansInp5" />
