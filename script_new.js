@@ -1,7 +1,14 @@
 const expand = () => {
-    document.getElementById("chat").classList.toggle("chat-dis");
-    document.getElementById("videos").classList.toggle("videos-dis");
+    document.getElementsByClassName("agora-div")[0].classList.toggle("chat-dis");
+    document.getElementsByClassName("chatInputDiv")[0].style.display = "none";
+    document.getElementsByClassName("chatArea")[0].style.display = "none";
+    document.getElementById("peopleList").style.display = "none";
 }
+const fullScreen = () => {
+    document.getElementsByClassName("videosLayout")[0].classList.toggle("whole-screen");
+    document.getElementsByClassName("agora-div")[0].style.position = "absolute"
+}
+
 
 let options = {
     appId: "c183e2e9fd8b4036bc8466b240a066ce",
@@ -891,6 +898,7 @@ const addReply = (id, replyMsg) => {
 }
 
 const addChat = async (msg, sender) => {
+    console.log(sender);
 
     let roleAndPic = getRoleAndPicFromName(sender);
     let picDiv = generateProfilePicOrInitials(sender, roleAndPic.profilePic);
@@ -1013,11 +1021,13 @@ const sendRaiseHandMessage = async () => {
     if (!rtm.handRaisedList.includes(options.userName)) {
         document.getElementById('raiseHandBtn').className = 'fas fa-hand-paper redAction';
         rtm.handRaisedList.push(options.userName);
-        let roleAndPic = getRoleAndPicFromName(options.userName)
-        let newHandRaiseP = generateRaiseHandList(options.userName, roleAndPic.role, roleAndPic.profilePic);
-        document.getElementById('handRaiseList').innerHTML += newHandRaiseP;
-        options.raisedHandCounter++;
-        document.getElementById('raisedHandCounter').innerHTML = `(${options.raisedHandCounter})`
+        console.log(rtm.handRaisedList);
+        // let roleAndPic = getRoleAndPicFromName(options.userName)
+        // let newHandRaiseP = generateRaiseHandList(options.userName, roleAndPic.role, roleAndPic.profilePic);
+        // document.getElementById('handRaiseList').innerHTML += newHandRaiseP;
+        // options.raisedHandCounter++;
+        // document.getElementById('raisedHandCounter').innerHTML = `(${options.raisedHandCounter})`
+        updatePeople();
         const chatJson = { messageType: 'raiseHand' }
         await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });
     }
@@ -1031,12 +1041,14 @@ const sendLowerHandMessage = async () => {
     if (rtm.handRaisedList.includes(options.userName)) {
         const index = rtm.handRaisedList.indexOf(options.userName);
         rtm.handRaisedList.splice(index, 1);
-        var elem = document.getElementById(`${options.userName}-hand`);
-        elem.parentNode.removeChild(elem);
-        options.raisedHandCounter--;
-        document.getElementById(
-            "raisedHandCounter"
-        ).innerHTML = `(${options.raisedHandCounter})`;
+        console.log(rtm.handRaisedList);
+        updatePeople();
+        // var elem = document.getElementById(`${options.userName}-hand`);
+        // elem.parentNode.removeChild(elem);
+        // options.raisedHandCounter--;
+        // document.getElementById(
+        //     "raisedHandCounter"
+        // ).innerHTML = `(${options.raisedHandCounter})`;
         document.getElementById("raiseHandBtn").className = `fas fa-hand-paper`;
         const chatJson = { messageType: "lowerHand" };
         await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });
@@ -1091,17 +1103,18 @@ const makeAudience = async () => {
 const raiseHand = async (senderId) => {
     if (!rtm.handRaisedList.includes(senderId)) {
         rtm.handRaisedList.push(senderId);
-        let roleAndPic = getRoleAndPicFromName(senderId);
-        let newHandRaiseP = generateRaiseHandList(
-            senderId,
-            roleAndPic.role,
-            roleAndPic.profilePic
-        );
-        document.getElementById("handRaiseList").innerHTML += newHandRaiseP;
-        options.raisedHandCounter++;
-        document.getElementById(
-            "raisedHandCounter"
-        ).innerHTML = `(${options.raisedHandCounter})`;
+        updatePeople();
+        // let roleAndPic = getRoleAndPicFromName(senderId);
+        // let newHandRaiseP = generateRaiseHandList(
+        //     senderId,
+        //     roleAndPic.role,
+        //     roleAndPic.profilePic
+        // );
+        // document.getElementById("handRaiseList").innerHTML += newHandRaiseP;
+        // options.raisedHandCounter++;
+        // document.getElementById(
+        //     "raisedHandCounter"
+        // ).innerHTML = `(${options.raisedHandCounter})`;
     }
 };
 
@@ -1109,12 +1122,13 @@ const lowerHand = (senderId) => {
     if (rtm.handRaisedList.includes(senderId)) {
         const index = rtm.handRaisedList.indexOf(senderId);
         rtm.handRaisedList.splice(index, 1);
-        var elem = document.getElementById(`${senderId}-hand`);
-        elem.parentNode.removeChild(elem);
-        options.raisedHandCounter--;
-        document.getElementById(
-            "raisedHandCounter"
-        ).innerHTML = `(${options.raisedHandCounter})`;
+        updatePeople();
+        // var elem = document.getElementById(`${senderId}-hand`);
+        // elem.parentNode.removeChild(elem);
+        // options.raisedHandCounter--;
+        // document.getElementById(
+        //     "raisedHandCounter"
+        // ).innerHTML = `(${options.raisedHandCounter})`;
     }
 };
 
@@ -1140,13 +1154,16 @@ const generatePeopleList = (name, role, profilePic) => {
     <div class="userItem" id="${name}-peoplList" >
       <div class="peopleListDiv">
         ${picDiv}
-        <span>${name.replace(/_/g, " ")} (${role})</span>
+        <span>${name.replace(/_/g, " ")}</span>
       </div>
+      <div class="userListInfo" >
+      <img style="display: ${rtm.handRaisedList.includes(name) ? 'block' : 'none'} " src="./icons/palm-of-hand 1.svg" alt="" />
       <i class="fas fa-ellipsis-v peopleListOptions" onclick="showOptionsPeopleList('${name}')" style="display: ${displayValue}"></i>
       <ul class="optionsDropdownPeopleList" style="display: none">
         <li onclick="sendMakeHostMessage('${name}')">Make Host</li>
         <li onclick="sendRemoveMessage('${name}')">Remove</li>
       </ul>
+      </div>
     </div>
     `;
 
@@ -1218,30 +1235,71 @@ const updatePeople = async () => {
             profilePic: userRoleAndPic.profilePic,
         });
     });
-    document.getElementById("peopleListGroup").innerHTML = "";
+    // document.getElementById("peopleListGroup").innerHTML = "";
+    document.getElementById("peopleListGroupHost").innerHTML = "";
+    document.getElementById("peopleListGroupSpeaker").innerHTML = "";
+    document.getElementById("peopleListGroupAudience").innerHTML = "";
+
     rtm.userList.forEach((user) => {
-        document.getElementById("peopleListGroup").innerHTML += generatePeopleList(
-            user.userName,
-            user.role,
-            user.profilePic
-        );
+        // document.getElementById("peopleListGroup").innerHTML += generatePeopleList(
+        //     user.userName,
+        //     user.role,
+        //     user.profilePic
+        // );
+        if (user.role === 'host') {
+            document.getElementById("peopleListGroupHost").innerHTML += generatePeopleList(
+                user.userName,
+                user.role,
+                user.profilePic
+            );
+        }
+        if (user.role === 'speaker') {
+            document.getElementById("peopleListGroupSpeaker").innerHTML += generatePeopleList(
+                user.userName,
+                user.role,
+                user.profilePic
+            );
+        }
+        if (user.role === 'audience') {
+            document.getElementById("peopleListGroupAudience").innerHTML += generatePeopleList(
+                user.userName,
+                user.role,
+                user.profilePic
+            );
+        }
     });
 };
 
 const searchForPeople = (e) => {
     const searchTerm = e.target.value;
-    document.getElementById("peopleListGroup").innerHTML = "";
+    // document.getElementById("peopleListGroup").innerHTML = "";
+    document.getElementById("peopleListGroupHost").innerHTML = "";
+    document.getElementById("peopleListGroupSpeaker").innerHTML = "";
+    document.getElementById("peopleListGroupAudience").innerHTML = "";
     rtm.userList.forEach((user) => {
         const formattedUserName = user.userName.toLowerCase();
         const formattedSearchTerm = searchTerm.toLowerCase().replace(/ /g, "_");
         if (formattedUserName.includes(formattedSearchTerm)) {
-            document.getElementById("peopleListGroup").innerHTML +=
-                generatePeopleList(user.userName, user.role, user.profilePic);
+            // document.getElementById("peopleListGroup").innerHTML +=
+            //     generatePeopleList(user.userName, user.role, user.profilePic);
+            if (user.role === 'host') {
+                document.getElementById("peopleListGroupHost").innerHTML +=
+                    generatePeopleList(user.userName, user.role, user.profilePic);
+            }
+            if (user.role === 'speaker') {
+                document.getElementById("peopleListGroupSpeaker").innerHTML +=
+                    generatePeopleList(user.userName, user.role, user.profilePic);
+            }
+            if (user.role === 'audience') {
+                document.getElementById("peopleListGroupAudience").innerHTML +=
+                    generatePeopleList(user.userName, user.role, user.profilePic);
+            }
         }
     });
 };
 
 const changeLayout = (toKeep) => {
+    document.getElementsByClassName("agora-div")[0].classList.remove("chat-dis");
     document.getElementById("chatArea").style.display = "none";
     document.getElementById("peopleList").style.display = "none";
     document.getElementById("handRaiseList").style.display = "none";
@@ -1251,9 +1309,12 @@ const changeLayout = (toKeep) => {
     document.getElementById(toKeep).style.display = "block";
     if (toKeep === "chatArea") {
         document.getElementsByClassName("chatInput")[0].style.display = "block";
+        document.getElementsByClassName("chatInputDiv")[0].style.display = "block";
+        document.getElementsByClassName("chatArea")[0].style.display = "block";
     }
     if (toKeep === "qnaArea") {
         document.getElementsByClassName("qnaInput")[0].style.display = "block";
+        document.getElementsByClassName("chatArea")[0].style.display = "block";
     }
 };
 
@@ -1264,7 +1325,7 @@ const toggleHostOnlyOptions = (displayType) => {
     document.getElementById("pollBtnDiv").style.display = displayType;
     document.getElementById("endSession").style.display = "none";
     changeLayout("chatArea");
-    document.getElementById("raiseHandListBtn").style.display = displayType;
+    // document.getElementById("raiseHandListBtn").style.display = displayType;
     const group1 = document.getElementsByClassName("streamOptions");
     for (let i = 0; i < group1.length; i++) group1[i].style.display = displayType;
 
