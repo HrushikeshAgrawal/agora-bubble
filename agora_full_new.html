@@ -59,6 +59,7 @@
                 <i class="fas fa-user-friends"></i>
             </p>
             <div class="videosLayout">
+                <div id="pinned" style="display: none"></div>
                 <div id="remote-container">
                     <div id="me" class="stremeElement stremeElement1" style="display: none">
                         <div class="tempImage" style="background: rgb(0, 255, 255); display: flex">
@@ -160,21 +161,21 @@
                 <div>
                     <div class="peopleListTitleDiv">
                         <small>Host</small>
-                        <i class="fas fa-chevron-down"></i>
+                        <i onclick="hideList('Host')" class="fas fa-chevron-down dropDownIcon"></i>
                     </div>
                     <div id="peopleListGroupHost"></div>
                 </div>
                 <div>
                     <div class="peopleListTitleDiv">
                         <small>Speakers</small>
-                        <i class="fas fa-chevron-down"></i>
+                        <i onclick="hideList('Speaker')" class="fas fa-chevron-down dropDownIcon"></i>
                     </div>
                     <div id="peopleListGroupSpeaker"></div>
                 </div>
                 <div>
                     <div class="peopleListTitleDiv">
                         <small>Audience</small>
-                        <i class="fas fa-chevron-down"></i>
+                        <i onclick="hideList('Audience')" class="fas fa-chevron-down dropDownIcon"></i>
                     </div>
                     <div id="peopleListGroupAudience"></div>
                 </div>

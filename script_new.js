@@ -44,6 +44,10 @@ let rtc = {
 let LOCAL_AUDIO_STREAM = true;
 let LOCAL_VIDEO_STREAM = true;
 let SCREEN_SHARE_STATUS = "OFF";
+// setInterval(function (evt) {
+//     var audioLevel = evt.stream.getAudioLevel();
+//     console.log(audioLevel);
+// }, 100)
 
 const initializeRTCClient = () => {
     // startLoader();
@@ -183,11 +187,23 @@ const openPollModal = () => {
     document.getElementById("poll-modal").style.display = "block";
 }
 
-const toggleAudio = () => {
-    if (LOCAL_AUDIO_STREAM) rtc.videoStream.muteAudio();
-    else rtc.videoStream.unmuteAudio();
+const toggleAudio = async () => {
+    if (LOCAL_AUDIO_STREAM) {
+        rtc.videoStream.muteAudio();
+        const index = rtm.unmuteList.indexOf(options.userName);
+        rtm.unmuteList.splice(index, 1);
+        console.log(rtm.unmuteList);
+    }
+    else {
+        rtc.videoStream.unmuteAudio();
+        rtm.unmuteList.push(options.userName);
+        console.log(rtm.unmuteList);
+    };
     LOCAL_AUDIO_STREAM = !LOCAL_AUDIO_STREAM;
+    const chatJson = { messageType: 'unmute' }
+    await rtm.channel.sendMessage({ text: JSON.stringify(chatJson) });
     renameBtns();
+    updatePeople();
 };
 
 const toggleVideo = () => {
@@ -367,7 +383,7 @@ const addVideoStream = async (elementId) => {
         let nameInitials = document.createElement("h1");
         nameInitials.innerHTML = elementId.charAt(0).toUpperCase();
         nameInitials.className = "nameInitials";
-        tempImage.style.background = "#00ffff";
+        // tempImage.style.background = `${"#" + ((1 << 24) * Math.random() | 0).toString(16)}`;
         tempImage.appendChild(nameInitials);
     }
     tempImage.className = "tempImage";
@@ -460,11 +476,7 @@ const updateClassName = () => {
                 newClassName += " stremeElementPinned";
             else newClassName += " stremeElementSide";
         } else {
-            if (options.streamVisibleCount === 1) newClassName += " stremeElement1";
-            else if (options.streamVisibleCount === 2)
-                newClassName += " stremeElement2";
-            else if (options.streamVisibleCount >= 3)
-                newClassName += " stremeElement3plus";
+
         }
         if (streams[i].id.includes("-Screen"))
             newClassName += " screenStremeElement";
@@ -579,7 +591,8 @@ let rtm = {
     client: null,
     channel: null,
     handRaisedList: [],
-    userList: []
+    userList: [],
+    unmuteList: []
 };
 
 const initializeRTMClient = () => {
@@ -681,6 +694,9 @@ const checkIfPinnedUserExist = async () => {
 const handleNewMessage = (chatJson, senderId) => {
 
     switch (chatJson.messageType) {
+        case "unmute":
+            unmuteAction(senderId);
+            break;
         case "addToPoll":
             addToPoll(chatJson.text);
             break;
@@ -1100,6 +1116,18 @@ const makeAudience = async () => {
     elem.parentNode.removeChild(elem);
 };
 
+const unmuteAction = async (senderId) => {
+    if (!rtm.unmuteList.includes(senderId)) {
+        rtm.unmuteList.push(senderId);
+        updatePeople();
+    }
+    else {
+        const index = rtm.unmuteList.indexOf(senderId);
+        rtm.unmuteList.splice(index, 1);
+        updatePeople();
+    }
+}
+
 const raiseHand = async (senderId) => {
     if (!rtm.handRaisedList.includes(senderId)) {
         rtm.handRaisedList.push(senderId);
@@ -1158,6 +1186,8 @@ const generatePeopleList = (name, role, profilePic) => {
       </div>
       <div class="userListInfo" >
       <img style="display: ${rtm.handRaisedList.includes(name) ? 'block' : 'none'} " src="./icons/palm-of-hand 1.svg" alt="" />
+      <img style="display: ${!rtm.unmuteList.includes(name) ? 'block' : 'none'} " src="./icons/mute.svg" alt="" />
+      <img style="display: ${rtm.unmuteList.includes(name) ? 'block' : 'none'} " src="./icons/unmute.svg" alt="" />
       <i class="fas fa-ellipsis-v peopleListOptions" onclick="showOptionsPeopleList('${name}')" style="display: ${displayValue}"></i>
       <ul class="optionsDropdownPeopleList" style="display: none">
         <li onclick="sendMakeHostMessage('${name}')">Make Host</li>
@@ -1205,7 +1235,7 @@ const generateProfilePicOrInitials = (name, profilePic) => {
       `;
     } else {
         picDiv = `
-      <div class="peopleListImage" style="background: #00ffff" >
+      <div class="peopleListImage" style="background: ${"#" + ((1 << 24) * Math.random() | 0).toString(16)}" >
         <h1>${name.charAt(0).toUpperCase()}</h1>
       </div>
       `;
@@ -1269,6 +1299,10 @@ const updatePeople = async () => {
         }
     });
 };
+
+const hideList = (list) => {
+    document.getElementById(`${'peopleListGroup' + list}`).classList.toggle('peopleListHide');
+}
 
 const searchForPeople = (e) => {
     const searchTerm = e.target.value;
